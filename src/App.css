@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --color-text: #070604;
+  --color-background: #fbfaf8;
+  --color-primary: #a1916a;
+  --color-secondary: #a9c9c1;
+  --color-accent: #8ba2b6;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: "Inter", "Helvetica Neue", system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.01em;
+  line-height: 1.6;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.brutal-card {
+  border: 2px solid var(--color-text);
+  box-shadow: 4px 4px 0 var(--color-text);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brutal-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--color-text);
+}
+
+.brutal-btn {
+  border: 2px solid var(--color-text);
+  box-shadow: 3px 3px 0 var(--color-text);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.brutal-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--color-text);
+}
+
+.brutal-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--color-text);
+}
+
+.brutal-input {
+  border: 2px solid var(--color-text);
+  box-shadow: 3px 3px 0 transparent;
+  font-weight: 500;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.brutal-input:focus {
+  outline: none;
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--color-secondary);
+}
+
+.brutal-input::placeholder {
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+}
