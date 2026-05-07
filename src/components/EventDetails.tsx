@@ -24,6 +24,7 @@ export default function EventDetails() {
   const [reservationExpiresAt, setReservationExpiresAt] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -38,6 +39,8 @@ export default function EventDetails() {
   const loadEvent = async () => {
     if (!id) return;
     try {
+      setInitialLoading(true);
+      setError("");
       const data = await api(`/events/${id}`);
       const normalized: EventData = {
         ...data,
@@ -46,8 +49,11 @@ export default function EventDetails() {
       };
       setEvent(normalized);
     } catch (err) {
+      setEvent(null);
       const apiError = err as ApiError;
       setError(apiError.message || "Failed to load event details");
+    } finally {
+      setInitialLoading(false);
     }
   };
 
@@ -145,10 +151,18 @@ export default function EventDetails() {
     }
   };
 
-  if (!event) {
+  if (initialLoading) {
     return (
       <div className="brutal-card inline-block bg-secondary px-4 py-2 text-lg font-black uppercase">
         Loading...
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="brutal-card inline-block bg-primary px-4 py-2 text-lg font-black uppercase text-background">
+        {error || "Event details could not be loaded."}
       </div>
     );
   }

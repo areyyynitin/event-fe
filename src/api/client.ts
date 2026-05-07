@@ -1,4 +1,23 @@
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+const parseErrorMessage = (data: any) => {
+    if (typeof data?.message === "string" && data.message.trim().length > 0) {
+        return data.message;
+    }
+
+    if (Array.isArray(data?.issues) && data.issues.length > 0) {
+        return data.issues
+            .map((issue: any) => `${issue.path?.join(".") || "field"}: ${issue.message}`)
+            .join(", ");
+    }
+
+    if (typeof data?.error === "string" && data.error.trim().length > 0) {
+        return data.error;
+    }
+
+    return "Request failed";
+};
+
 export class ApiError extends Error {
     status: number;
     details: any;
@@ -27,7 +46,7 @@ export const api = async (
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-        throw new ApiError(data?.message || "Request failed", res.status, data);
+        throw new ApiError(parseErrorMessage(data), res.status, data);
     }
     return data;
 };

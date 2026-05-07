@@ -11,17 +11,30 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  const getLoginErrorMessage = (apiError: ApiError) => {
+    if (apiError.status === 400) {
+      return "Invalid email or password.";
+    }
+    return apiError.message || "Login failed. Please try again.";
+  };
+
   const handleLogin = async () => {
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail || !password) {
+      setError("Please enter both email and password.");
+      return;
+    }
+
     try {
       setError("");
-      const res = await api("/auth/signin", "POST", { email, password });
+      const res = await api("/auth/signin", "POST", { email: normalizedEmail, password });
       if (res.token) {
         setToken(res.token);
         navigate("/");
       }
     } catch (err) {
       const apiError = err as ApiError;
-      setError(apiError.message || "Login failed");
+      setError(getLoginErrorMessage(apiError));
     }
   };
 
@@ -33,12 +46,14 @@ export default function Login() {
       <div className="mt-6 space-y-4">
         <input
           placeholder="email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="brutal-input w-full bg-background px-3 py-2 outline-none"
         />
         <input
           placeholder="password"
           type="password"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="brutal-input w-full bg-background px-3 py-2 outline-none"
         />
