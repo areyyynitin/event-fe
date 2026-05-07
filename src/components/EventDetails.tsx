@@ -14,6 +14,11 @@ interface EventData {
   seats?: Seat[];
 }
 
+interface UserReservationData {
+  seatNumbers?: number[];
+  expiresAt?: string | null;
+}
+
 export default function EventDetails() {
   const { id } = useParams();
   const { token } = useAuth();
@@ -57,9 +62,41 @@ export default function EventDetails() {
     }
   };
 
+  const loadMyReservation = async () => {
+    if (!id || !token) {
+      setReservedSeats([]);
+      setReservationExpiresAt(null);
+      return;
+    }
+
+    try {
+      const data = (await api(`/reservations/${id}/me`, "GET", undefined, token)) as UserReservationData;
+      const seatNumbers = Array.isArray(data?.seatNumbers) ? data.seatNumbers : [];
+      const expiresAt = data?.expiresAt ?? null;
+
+      setReservedSeats(seatNumbers);
+      setReservationExpiresAt(expiresAt);
+      if (expiresAt) {
+        const initialSeconds = Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+        setTimeLeft(initialSeconds);
+      } else {
+        setTimeLeft(0);
+      }
+    } catch {
+      setReservedSeats([]);
+      setReservationExpiresAt(null);
+      setTimeLeft(0);
+    }
+  };
+
   useEffect(() => {
     loadEvent();
+    loadMyReservation();
   }, [id]);
+
+  useEffect(() => {
+    loadMyReservation();
+  }, [token, id]);
 
   useEffect(() => {
     if (!reservationExpiresAt) {
@@ -109,7 +146,8 @@ export default function EventDetails() {
       setLoading(true);
       clearNotices();
       const res = await api("/reserve", "POST", { eventId: id, seatNumbers: selectedSeats }, token);
-      setReservedSeats(selectedSeats);
+      const seatNumbers = Array.isArray(res?.seatNumbers) ? res.seatNumbers : selectedSeats;
+      setReservedSeats(seatNumbers);
       setReservationExpiresAt(res.expiresAt);
       const initialSeconds = Math.max(
         0,
@@ -117,6 +155,7 @@ export default function EventDetails() {
       );
       setTimeLeft(initialSeconds);
       setMessage("Seats reserved. Confirm booking before the timer ends.");
+      setSelectedSeats([]);
       await loadEvent();
     } catch (err) {
       const apiError = err as ApiError;
